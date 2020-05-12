@@ -1,0 +1,15 @@
+
+前端开发：
+
+1。学习react  
+2. node.js
+3。es6规范
+
+
+npm start :
+
+npm install :
+
+ npm i nowa -g ：
+	
+npm i:

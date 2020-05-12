@@ -1,0 +1,307 @@
+
+	https://www.cnblogs.com/xuwujing/p/10933082.html
+
+一、try/catch异常处理的缺陷
+
+	在开发SpringBoot应用时，往往会遇到以下情景：在某个接口中，存在一些可能的异常。
+	比如url参数错误、用户账号和密码错误等。这时我们可以在发生异常的地方抛出我们自定义的异常，并对异常进行处理，	
+二、引入全局异常处理
+
+	为了解决这一问题，Spring3.2中新增了@ControllerAdvice注解，可以通过该注解配置一个全局异常处理类，
+	它能统一处理Controller中抛出的异常而 不需要 书写 try/catch语句。
+	
+	注意：自定义异常类必须继承自RuntimeException才可以
+	
+	3、Controller中遇到异常直接抛出即可
+
+	hrow new BadRequestParameterException()
+
+·1· 自定义基础接口类：
+
+	首先定义一个基础的接口类，自定义的 错误描述 枚举类 需实现该接口。
+	代码如下:
+
+
+public interface BaseErrorInfoInterface {
+    /** 错误码*/
+	 String getResultCode();
+	
+	/** 错误描述*/
+	 String getResultMsg();
+}
+
+
+2. 自定义一个枚举类
+	然后我们这里在自定义一个枚举类，并实现该接口。
+	代码如下:
+
+
+public enum CommonEnum implements BaseErrorInfoInterface {
+	// 数据操作错误定义
+	SUCCESS("200", "成功!"), 
+	BODY_NOT_MATCH("400","请求的数据格式不符!"),
+	SIGNATURE_NOT_MATCH("401","请求的数字签名不匹配!"),
+	NOT_FOUND("404", "未找到该资源!"), 
+	INTERNAL_SERVER_ERROR("500", "服务器内部错误!"),
+	SERVER_BUSY("503","服务器正忙，请稍后再试!")
+	;
+
+	/** 错误码 */
+	private String resultCode;
+
+	/** 错误描述 */
+	private String resultMsg;
+
+	CommonEnum(String resultCode, String resultMsg) {
+		this.resultCode = resultCode;
+		this.resultMsg = resultMsg;
+	}
+
+	@Override
+	public String getResultCode() {
+		return resultCode;
+	}
+
+	@Override
+	public String getResultMsg() {
+		return resultMsg;
+	}
+}
+
+
+3. 自定义异常类
+
+	然后我们在来自定义一个异常类，用于处理我们发生的业务异常。
+	代码如下:
+
+
+public class BizException extends RuntimeException {
+	/**
+	 * 错误码
+	 */
+	protected String errorCode;
+	/**
+	 * 错误信息
+	 */
+	protected String errorMsg;
+
+	public BizException() {
+		super();
+	}
+
+	public BizException(BaseErrorInfoInterface errorInfoInterface) {
+		super(errorInfoInterface.getResultCode());
+		this.errorCode = errorInfoInterface.getResultCode();
+		this.errorMsg = errorInfoInterface.getResultMsg();
+	}
+	
+	public BizException(BaseErrorInfoInterface errorInfoInterface, Throwable cause) {
+		super(errorInfoInterface.getResultCode(), cause);
+		this.errorCode = errorInfoInterface.getResultCode();
+		this.errorMsg = errorInfoInterface.getResultMsg();
+	}
+	
+	public BizException(String errorMsg) {
+		super(errorMsg);
+		this.errorMsg = errorMsg;
+	}
+	
+	public BizException(String errorCode, String errorMsg) {
+		super(errorCode);
+		this.errorCode = errorCode;
+		this.errorMsg = errorMsg;
+	}
+
+	public BizException(String errorCode, String errorMsg, Throwable cause) {
+		super(errorCode, cause);
+		this.errorCode = errorCode;
+		this.errorMsg = errorMsg;
+	}
+	
+
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public String getErrorMsg() {
+		return errorMsg;
+	}
+
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
+	}
+
+	public String getMessage() {
+		return errorMsg;
+	}
+
+	@Override
+	public Throwable fillInStackTrace() {
+		return this;
+	}
+
+}
+
+
+4.自定义数据格式
+
+	顺便这里我们定义一下数据的传输格式。
+	代码如下:
+
+
+public class ResultBody {
+/**
+	 * 响应代码
+	 */
+	private String code;
+
+	/**
+	 * 响应消息
+	 */
+	private String message;
+
+	/**
+	 * 响应结果
+	 */
+	private Object result;
+
+	public ResultBody() {
+	}
+
+	public ResultBody(BaseErrorInfoInterface errorInfo) {
+		this.code = errorInfo.getResultCode();
+		this.message = errorInfo.getResultMsg();
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Object getResult() {
+		return result;
+	}
+
+	public void setResult(Object result) {
+		this.result = result;
+	}
+
+
+
+5.自定义全局异常处理类
+
+	最后我们在来编写一个自定义全局异常处理的类。
+	代码如下:
+
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+	
+	/**
+	 * 处理自定义的业务异常
+	 * @param req
+	 * @param e
+	 * @return
+	 */
+    @ExceptionHandler(value = BizException.class)  
+    @ResponseBody  
+	public  ResultBody bizExceptionHandler(HttpServletRequest req, BizException e){
+    	logger.error("发生业务异常！原因是：{}",e.getErrorMsg());
+    	return ResultBody.error(e.getErrorCode(),e.getErrorMsg());
+    }
+
+	/**
+	 * 处理空指针的异常
+	 * @param req
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler(value =NullPointerException.class)
+	@ResponseBody
+	public ResultBody exceptionHandler(HttpServletRequest req, NullPointerException e){
+		logger.error("发生空指针异常！原因是:",e);
+		return ResultBody.error(CommonEnum.BODY_NOT_MATCH);
+	}
+
+
+    /**
+        * 处理其他异常
+     * @param req
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value =Exception.class)
+	@ResponseBody
+	public ResultBody exceptionHandler(HttpServletRequest req, Exception e){
+    	logger.error("未知异常！原因是:",e);
+       	return ResultBody.error(CommonEnum.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+
+
+6 .Controller 控制层
+
+	控制层这边也比较简单，使用Restful风格实现的CRUD功能，不同的是这里我故意弄出了一些异常，好让这些异常被捕获到然后处理。
+	这些异常中，有自定义的异常抛出，也有空指针的异常抛出，当然也有不可预知的异常抛出(这里我用类型转换异常代替)，那么我们在完成代码编写之后，
+	看看这些异常是否能够被捕获处理成功吧！
+
+	代码如下:
+
+
+@RestController
+@RequestMapping(value = "/api")
+public class UserRestController {
+
+	@PostMapping("/user")
+    public boolean insert(@RequestBody User user) {
+    	System.out.println("开始新增...");
+    	//如果姓名为空就手动抛出一个自定义的异常！
+        if(user.getName()==null){
+            throw  new BizException("-1","用户姓名不能为空！");
+        }
+        return true;
+    }
+
+    @PutMapping("/user")
+    public boolean update(@RequestBody User user) {
+    	System.out.println("开始更新...");
+       //这里故意造成一个空指针的异常，并且不进行处理
+        String str=null;
+        str.equals("111");
+        return true;
+    }
+
+    @DeleteMapping("/user")
+    public boolean delete(@RequestBody User user)  {
+        System.out.println("开始删除...");
+        //这里故意造成一个异常，并且不进行处理
+        Integer.parseInt("abc123");
+        return true;
+    }
+}
+
+7.测试
+
+	1.的确是返回 空指针 的异常护理，可以得出 全局异常 处理 优先处理   子类的 异常。
+		1.1 来试试未指定其异常的处理，看该异常是否能够被捕获，
+		      它使用了我们在自定义全局异常处理类中的Exception异常处理的方法。
+	2.自义定全局异常处理除了可以处理上述的数据格式之外，也可以处理   页面的跳转，
+	只需在新增的 异常方法的 返回处理 上填写该 跳转的路径   并不使用 ResponseBody 注解即可。

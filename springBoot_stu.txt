@@ -1,0 +1,41 @@
+
+
+注解：
+	@param:
+	
+
+	@Data :	
+	
+	
+		全局异常处理：
+	@ControllerAdvice 
+			1.表示开启了 全局异常 的捕获；	
+	@ExceptionHandler	  2. 只需在自定义一个方法使用ExceptionHandler注解
+			3.然后定义捕获异常的类型， 即可对这些 捕获的异常 进行 统一的 处理。
+			eg:
+
+	自定义全局异常处理的类。
+	代码如下:
+
+
+	@ControllerAdvice
+	public class GlobalExceptionHandler {
+		private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+		/**
+	 	* 处理空指针的异常
+		 * @param req
+		 * @param e
+		 * @return
+		 */
+		@ExceptionHandler(value =NullPointerException.class)
+		@ResponseBody
+		public ResultBody exceptionHandler(HttpServletRequest req, NullPointerException e){
+		logger.error("发生空指针异常！原因是:",e);
+		return ResultBody.error(CommonEnum.BODY_NOT_MATCH);
+	}
+
+   1. 自义定 全局异常处理 除了可以处理上述的数据格式之外，也可以处理 页面的跳转，只需在新增的  异常方法的 返回处理上填写该  跳转的路径 ,
+      并不使用ResponseBody 注解即可。
+
+
+	@DeleteMapping  

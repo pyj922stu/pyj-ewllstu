@@ -1,0 +1,11 @@
+
+	import com.alibaba.fastjson.JSON; 
+
+	使用： 
+		对象转化为json串  	：JSON.toJSONString(search)	
+	eg: 
+	     AdmSearch search = new AdmSearch();
+                    search.setVisitNo("8C96557EE39171F0E055AF64F7DDE7AB");
+	    messageHeader.setParams (JSON.toJSONString(search));
+            			
+		

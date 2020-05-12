@@ -1,0 +1,103 @@
+
+
+# 1.查看所有分支
+> git branch -a
+
+# 2.查看当前使用分支(结果列表中前面标*号的表示当前使用分支)
+> git branch
+ 
+# 3.切换分支
+> git checkout 分支名
+
+2）创建并切换到新分支
+	git branch fenzhi_name 创建分支
+	git checkout -b panda 
+3.给分支加入一个新的远程端
+	建立的分支z3, 命令为
+	git remote add z3 git@192.168.1.188:sprd6820.git
+
+3)更新分支代码并提交
+
+	git add *
+
+	git commit -m "init panda"
+
+	git push origin panda
+
+4 . dev分支的工作成果合并到master分支上：
+	
+	$ git merge dev
+5 . 删除dev分支了：
+
+	$ git branch -d dev
+
+6 git  init
+	当在 本地克隆 好一个项目 之后，想要 本地和远程之间 有互动 第一步就是要 初始化本地仓库。
+	git init 就是完成这件事情，创建一个空的git仓库或者重新初始化一个现有的仓库。
+
+	执行git init之后会生成.git的目录，该目录下有branches, hooks,info,objects,refs目录和config, description,HEAD文件。
+7. git clone
+	1、git clone 的理解
+
+
+git diff --查看分支代码改动
+
+git rm test.txt
+	确实要从版本库中 删除该文件，那就用命令git rm删掉，并且git commit：
+
+
+	$ git rm test.txt
+	rm 'test.txt'
+
+	$ git commit -m "remove test.txt"
+
+	git clone默认会把远程仓库整个给clone下来 ，只能clone远程库的master分支并在本地默认创建一个master分支 ，
+	无法clone所有分支，若想要其它分支的内容，如下：
+
+git status 查看状态
+
+
+
+---------------------------ewell-------------------------------
+
+检出，在本地审查和合并
+
+	Step 1. 获取并检出此合并请求的分支
+
+		git fetch origin
+		git checkout -b feature-pat-pyj origin/feature-pat-pyj
+
+	Step 2. 本地审查变更
+
+	Step 3. 合并分支并修复出现的任何冲突
+
+		git checkout develop
+		git merge --no-ff    feature-pat-pyj
+
+	Step 4. 推送合并的结果到 GitLab
+
+	git push origin develop
+
+
+ git fetch：
+	相当于是从远程获取最新版本到本地，不会自动merge
+	
+git pull：
+	相当于是从远程获取最新版本并 merge到本地
+	git pull 作用是，取回远程主机某个分支的更新，再与本地的指定分支合并
+
+	将文件提交至远程端时，文件的提交需要经过git add、git commit及git push三个过程才能提交至git远程仓库
+
+git merge –no-ff  	可以保存你之前的分支历史。能够更好的查看 merge历史，以及branch 状态。
+
+git merge 	则不会显示 feature，只保留单条分支记录。
+
+git reset		中有三个命令（--hard、--soft与--mixed）；
+		主要用于工作区、暂存区、本地仓库三个区域的文件提交撤回。
+
+git reset --hard xxx  会将工作区、暂存区、本地仓库的所有提交的文件全都撤销（包括工作区文件，会删除）
+
+git revert       是一种反做命令，比如你commit提交了一个文件，如果用上的话就相当于是撤回了这个文件，
+		但是他有一个不同的就是可以跨过已提交的版本
+
+
