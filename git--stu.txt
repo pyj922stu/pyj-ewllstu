@@ -56,6 +56,16 @@ git rm test.txt
 
 git status 查看状态
 
+git restore 文件名字    
+		:进行清除工作区的改变 ()
+   		同git checkout 文件名字    的作用是一样的；
+  		 与git add .的作用相反
+		-----------
+		还原当前目录中的所有文件
+		git restore .
+		还原文件
+		git restore <file>
+
 
 
 ---------------------------ewell-------------------------------
