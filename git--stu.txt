@@ -1,10 +1,29 @@
 
+----代码提交到服务器
+  1.从develop拉代码check-out ,建立并切换到要改代码的分支--
+2.  2.1分支上改代码---》    2.2提交本地 只commit  不push （或者不做这一步）
+3.拉取本分支代码 ，pull 
+4.拉取时如果提示冲突，解决冲突（这一步待认真学习）；           -----------------！！！！---------------------
+5.解决冲突后再次pull,成功后 再commit and push   自己分支的代码
+6.开发完成后可把本分支再合并到开发分支（合并具体待认真学习）-----------------！！！！---------------------
+
+
+
 
 # 1.查看所有分支
-> git branch -a
+> git branch -a   查看全部分支(包含本地和远程) ：git branch -a
+
+单独直接查看远程仓库的所有分支如下：
+git branch -r
+
+
 
 # 2.查看当前使用分支(结果列表中前面标*号的表示当前使用分支)
-> git branch
+> git branch   1、查看本地分支 ： git branch 
+
+删除本地已合并的分支： git branch -d [branchname]
+
+3、删除远程分支: git push origin --delete [branchname]
  
 # 3.切换分支
 > git checkout 分支名
@@ -36,6 +55,15 @@
 	git init 就是完成这件事情，创建一个空的git仓库或者重新初始化一个现有的仓库。
 
 	执行git init之后会生成.git的目录，该目录下有branches, hooks,info,objects,refs目录和config, description,HEAD文件。
+6.git submodule init
+  
+7. git submodule update   子模块内容下载下来后工程才不会缺少相应的文件。
+
+7.git submodule update --init --recursive  这个时候就比较麻烦了，每次clone下来之后首先要在第一层依赖的子模块的仓库
+			对子模块进行init和update，之后再进入依赖有子模块的子模块仓库再进行init和update，以此递归下去，比较麻烦，
+			此时可以使用下面指令一次性完成递归init和update
+
+
 7. git clone
 	1、git clone 的理解
 

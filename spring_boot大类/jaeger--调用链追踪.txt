@@ -1,0 +1,97 @@
+
+场景：
+
+
+	导读：有一天我们接到这样一条客诉“你们的收银软件最近特别慢，严重影响我们的收银效率，再不解决我们就不用了”，我相信大家应该都遇到过这种问题，即使现在没遇到，将来一定会遇到的，那遇到了怎么办呢？就这个话题我们今天一起来聊一聊。
+
+关键词：分布式，链路追踪
+
+ 
+
+靠人终究靠不住
+
+不知道大家是怎么处理开头提到的那种问题的呢？最简单粗暴的办法就是把相关人员集中到一个会议室里面对数据，怎么对呢？
+
+　　客户端开发人员：我查了日志，客户端的请求过程一共用了5s，请求是从几点几分几秒发起的，你们查下服务端的日志；
+
+　　交易系统开发人员：我这边是几点几分几秒收到的请求，交易系统一共花了4s多一些，其中调用支付网关花了将近4s，网关那边看下日志吧；
+
+　　网关开发人员：我这边是几点几分几秒收到的请求，网关一共花了3s多一点，大部分时间都花在了调用第三方上；
+
+估计大多数人最开始都是这么处理此类问题的，简单粗暴。但如果三天两头给你来这么一下子你还受得了吗？每天给你几百个上千个订单号让你对数据，你还能抽时间写代码吗?估计连带薪上厕所的时间都没了吧。最后这个问题可能传到了领导那里，领导一般喜欢要全局报表数据，
+你怎么给他出这个报表？是不是束手无策，突然有点想换工作了，哈哈。我们还真是接到过这种需求，一堆人在那里awk然后就没有然后了。
+https://www.colabug.com/2018/0629/3376357/  不错
+
+opentracing java-spring-jaeger
+运用：   Zipkin另一种
+
+    依赖：1.  <dependency>
+                <groupId>io.opentracing.contrib</groupId>
+                <artifactId>opentracing-spring-cloud-starter</artifactId>
+                <version>0.1.8</version>
+            </dependency>
+            
+           2.
+            <groupId>com.uber.jaeger</groupId>
+             <artifactId>jaeger-core</artifactId>
+             <version>0.26.0</version>
+             
+             3.  <groupId>com.uber.jaeger</groupId>
+             <artifactId>jaeger-b3</artifactId>
+             <version>0.26.0</version>
+            
+            4.
+                 <groupId>org.apache.httpcomponents</groupId>
+             <artifactId>httpclient</artifactId>
+             <version>4.5.5</version>
+			 
+			 
+			 
+			 配置连接属性：
+
+			opentracing.jaeger.enabled=true
+			opentracing.jaeger.udp-sender.host=localhost
+			opentracing.jaeger.udp-sender.port=6831
+
+  2.启动类 application添加bean
+
+          注意：http://192.168.181.99:30668/api/traces 为对应的jaeger collector地址
+		  
+		  
+          service-c 为服务名称
+          
+          @Bean
+            public io.opentracing.Tracer jaegerTracer() {
+
+                Reporter reporter = new RemoteReporter.Builder().withFlushInterval(10)
+                        .withMaxQueueSize(65000)
+                        .withSender(new HttpSender("http://192.168.181.99:30668/api/traces"))
+                        .withMetrics(new Metrics(new NoopMetricsFactory()))
+                        .build();
+
+                Builder builder = new Builder("service-c")
+                        .withReporter(reporter)
+                        .withSampler(new ConstSampler(true))
+                        .registerInjector(Format.Builtin.HTTP_HEADERS, new B3TextMapCodec())
+                        .registerExtractor(Format.Builtin.HTTP_HEADERS, new B3TextMapCodec());
+
+                return builder.build();
+
+            }
+          
+？？？？？？？？？？？？？？？？？？？
+
+另外 和docker 结合：
+
+	https://my.oschina.net/u/1789379/blog/1551421
+
+3. httpclient 埋点  ？？？
+          
+       
+
+
+
+
+
+
+
