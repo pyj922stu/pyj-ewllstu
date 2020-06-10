@@ -6,8 +6,15 @@
 4.拉取时如果提示冲突，解决冲突（这一步待认真学习）；           -----------------！！！！---------------------
 5.解决冲突后再次pull,成功后 再commit and push   自己分支的代码
 6.开发完成后可把本分支再合并到开发分支（合并具体待认真学习）-----------------！！！！---------------------
-
-
+		以下命令的含义：
+	首先从远程的origin的master主分支下载最新的版本到origin/master分支上
+	然后比较本地的master分支和origin/master分支的差别
+	最后进行合并
+	上述过程其实可以用以下更清晰的方式来进行：
+		git fetch origin master:tmp
+		git diff tmp
+		git merge tmp
+--------------------------------------------------
 
 
 # 1.查看所有分支
@@ -119,6 +126,9 @@ git restore 文件名字
 
  git fetch：
 	相当于是从远程获取最新版本到本地，不会自动merge
+
+ git fetch -p  
+	   清理远程已删除本地还存在的分支 git fetch --prune origin 或者 git fetch -p 或者 git pull -p
 	
 git pull：
 	相当于是从远程获取最新版本并 merge到本地
